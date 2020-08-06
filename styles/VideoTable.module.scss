@@ -1,0 +1,22 @@
+.video-table {
+  flex: 1;
+  
+  .row {
+    width: fit-content;
+    white-space: nowrap;
+
+    &.header {
+      color: #444444;
+      font-weight: 500;
+      background-color: white;
+    }
+
+    .element {
+      display: inline-block;
+      width: 200px;
+      &.checkbox {
+        width: 50px;
+      }
+    }
+  }
+}

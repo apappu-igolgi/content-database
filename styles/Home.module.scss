@@ -1,0 +1,36 @@
+.home {
+  background-color: #004d79;
+  height: 100vh;
+  width: 100%;
+  // padding-top: 12vh
+  overflow: hidden;
+
+  .table-container {
+    height: 80%;
+    width: 80%;
+    margin: auto;
+    margin-top: 12vh;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 35px 50px;
+    border-radius: 15px;
+
+    .buttons {
+      margin-bottom: 20px;
+
+      .button {
+        margin: 0 7px;
+      }
+    }
+
+    .filter-table {
+      flex: 1;
+      display: flex;
+
+      .filters {
+        margin-left: 20px;
+      }
+    }
+  }
+}

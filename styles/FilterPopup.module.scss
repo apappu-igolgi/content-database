@@ -1,0 +1,22 @@
+.filter-popup {
+
+  .fields {
+  display: flex;
+  margin: 20px;
+  justify-content: center;
+    .field {
+      margin: 0 10px;
+      min-width: 100px;
+      text-align: center;
+    }
+  }
+  
+
+  .buttons {
+    // width: 100%;
+    margin: 15px 6%;
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+  }
+}
