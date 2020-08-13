@@ -3,21 +3,29 @@ import { Formik, Form, Field } from 'formik';
 
 import styles from '../../styles/FilterPopup.module.scss';
 import { formatCamelCase, comparisonOptions } from '../../util/videos';
+import { useState } from 'react';
 
-const FilterPopup = ({ keys, onSubmit, close }) => {
+const allowedOperatorsByType = {
+  number: ['gt', 'lt', 'equals'],
+  string: ['equals', 'contains'],
+}
+
+const FilterPopup = ({ fields, onSubmit, close }) => {
+  const [allowedOperations, setAllowedOperations] = useState(allowedOperatorsByType[fields[0].type]);
+
   return (
-    <Formik initialValues={{ key: keys[0], comparison: 'equals' }} onSubmit={values => onSubmit(values).then(() => close())}>
+    <Formik initialValues={{ key: fields[0].key, comparison: 'equals' }} onSubmit={values => onSubmit(values).then(() => close())}>
       {({ isSubmitting }) => (
         <Form className={styles['filter-popup']}>
           <div className={styles.fields}>
             <Field className={styles.field} as={Select} name="key">
-              {keys.map(key => (
-                <MenuItem value={key}>{formatCamelCase(key)}</MenuItem>
+              {fields.map(({ key, name, type }) => (
+                <MenuItem value={key} onClick={() => setAllowedOperations(allowedOperatorsByType[type])}>{name}</MenuItem>
               ))}
             </Field>
 
             <Field className={styles.field} as={Select} name="comparison">
-              {Object.entries(comparisonOptions).map(([option, text]) => (
+              {Object.entries(comparisonOptions).filter(([option]) => allowedOperations.includes(option)).map(([option, text]) => (
                 <MenuItem value={option}>{text}</MenuItem>
               ))}
             </Field>

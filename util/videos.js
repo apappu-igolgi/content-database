@@ -11,6 +11,14 @@ export const formatCamelCase = camelCase => {
   return (captialFirstWord + ' ' + remainingWords.join(' ')).trim();
 }
 
+export const capitalize = word => word[0].toUpperCase() + word.slice(1);
+
+export const fieldNameToKey = name => {
+  const [firstWord, ...remainingWords] = name.split(' ');
+  const key = firstWord.toLowerCase() + remainingWords.map(word => capitalize(word.toLowerCase())).join('');
+  return key.replace(/[\-'"\)\(]/g, ''); // remove any special characters
+}
+
 export const getNumVideos = filters => (
   fetch(`/api/video-count?filters=${encodeURIComponent(JSON.stringify(filters))}`).then(res => res.json())
 );
@@ -44,4 +52,21 @@ export const updateVideo = video => fetch('/api/update-video', {
 export const deleteVideos = ids => fetch('/api/delete-videos', {
   method: 'POST',
   body: JSON.stringify(ids) 
+}).then(res => res.json());
+
+export const getFields = () => fetch('/api/fields').then(res => res.json());
+
+export const addField = ({ name, type }) => fetch('/api/add-field', {
+  method: 'POST',
+  body: JSON.stringify({ key: fieldNameToKey(name), name, type }),
+}).then(res => res.json());
+
+export const deleteField = key => fetch('/api/delete-field', {
+  method: 'POST',
+  body: JSON.stringify({ key }),
+}).then(res => res.json());
+
+export const reorderFields = keys => fetch('/api/reorder-fields', {
+  method: 'POST',
+  body: JSON.stringify({ keys })
 }).then(res => res.json());

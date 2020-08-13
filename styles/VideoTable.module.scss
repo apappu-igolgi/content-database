@@ -9,13 +9,28 @@
       color: #444444;
       font-weight: 500;
       background-color: white;
+      .element {
+        display: inline-flex;
+        align-items: center;
+        position: relative;
+        cursor: grab;
+        .delete-icon {
+          visibility: hidden;
+        }
+
+        &:hover .delete-icon {
+          visibility: visible;
+        }
+      }
     }
 
     .element {
       display: inline-block;
       width: 200px;
-      &.checkbox {
-        width: 50px;
+      &.row-number {
+        font-weight: 600;
+        font-family: monospace;
+        font-size: 1.258em;
       }
     }
   }

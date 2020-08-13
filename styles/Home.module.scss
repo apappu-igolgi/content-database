@@ -6,18 +6,30 @@
   overflow: hidden;
 
   .table-container {
-    height: 80%;
+    height: 88%;
     width: 80%;
     margin: auto;
-    margin-top: 12vh;
+    margin-top: 6vh;
     display: flex;
     flex-direction: column;
     background-color: white;
     padding: 35px 50px;
     border-radius: 15px;
 
+    .title {
+      color: #37352F;
+      // width: 80%;
+      // margin-left: auto;
+      // margin-right: auto;
+      font-family: Roboto, sans-serif;
+      font-weight: 500;
+      font-size: 2.1em;
+      margin-top: 0;
+      // text-align: center;
+    }
+
     .buttons {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
 
       .button {
         margin: 0 7px;
@@ -30,6 +42,17 @@
 
       .filters {
         margin-left: 20px;
+
+        .filter-button {
+          margin-bottom: 10px;
+        }
+
+        .filter {
+          // font-size: .9em;
+          display: flex;
+          // line-height: 24px;
+          margin: 5px 0;
+        }
       }
     }
   }

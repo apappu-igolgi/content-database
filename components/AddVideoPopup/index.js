@@ -1,10 +1,16 @@
 import { Formik, Form, Field } from 'formik';
 import { Button, TextField } from '@material-ui/core';
 
-import styles from '../../styles/AddVideoPopup.module.scss'
-import { formatCamelCase } from '../../util/videos';
+import styles from '../../styles/AddVideoPopup.module.scss';
+import FileUpload from '../ImageUpload';
 
-const AddVideoPopup = ({ keys, close, onSubmit, editMode, video }) => {
+const fieldPropsByType = {
+  number: { as: TextField, variant: 'outlined' },
+  string: { as: TextField, variant: 'outlined' },
+  image: { as: FileUpload },
+}
+
+const AddVideoPopup = ({ fields, close, onSubmit, editMode, video }) => {
   return (
     <Formik
       initialValues={editMode ? video : {}}
@@ -14,15 +20,19 @@ const AddVideoPopup = ({ keys, close, onSubmit, editMode, video }) => {
         <Form className={styles['add-video-popup']}>
           <div className={styles.title}>Add Video</div>
 
-          {keys.map(key => (
-            <Field
-              className={styles.field}
-              as={TextField}
-              name={key}
-              label={formatCamelCase(key)}
-              variant="outlined"
-            />
-          ))}
+          <div className={styles.fields}>
+            {fields.map(({ key, name, type }) => (
+              <Field
+                className={styles.field}
+                name={key}
+                label={name}
+                {...fieldPropsByType[type]}
+              />
+            ))}
+            {fields.length % 2 === 1 && (
+              <div className={styles.field} />
+            )}
+          </div>
 
           <div className={styles.buttons}>
             <Button type="button" variant="outlined" onClick={close}>Cancel</Button>

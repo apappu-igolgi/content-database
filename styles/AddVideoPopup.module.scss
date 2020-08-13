@@ -1,9 +1,4 @@
 .add-video-popup {
-  display: flex;
-  flex-flow: row wrap;
-  align-items: center;
-  justify-content: space-evenly;
-  // width: 500px;
   width: 100%;
 
   .title {
@@ -14,14 +9,22 @@
     margin: 20px 6%;
   }
 
-  .field {
-    width: 41%;
-    max-width: 300px;
-    margin: 7px 0;
+  .fields {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    max-height: 400px;
+    overflow: auto;
+
+    .field {
+      width: 41%;
+      max-width: 300px;
+      margin: 7px 0;
+    }
   }
 
   .buttons {
-    width: 100%;
     margin: 15px 6%;
     display: flex;
     justify-content: space-between;

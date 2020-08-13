@@ -1,24 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Popup from 'reactjs-popup';
-import { Button } from '@material-ui/core';
+import { Button, Chip } from '@material-ui/core';
 import styles from '../styles/Home.module.scss';
 import VideoTable from '../components/VideoTable';
-import { getKeys, getNumVideos, getVideos, addVideo, deleteVideos, updateVideo } from '../util/videos';
+import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, comparisonOptions, getFields, addField, deleteField, reorderFields } from '../util/videos';
 import AddVideoPopup from '../components/AddVideoPopup';
+import AddFieldPopup from '../components/AddFieldPopup';
 import FilterPopup from '../components/FilterPopup';
 
 export default function Home() {
+  const [fields, setFields] = useState([]);
   const [numVideos, setNumVideos] = useState(0);
   const [videos, setVideos] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
+
+  // filters has the following format:
+  // { [key]: { [comparison]: value, [comparison2]: value2, ... }, ...}
   const [filters, setFilters] = useState({});
 
-  const refetchNumVideos = useCallback(() => getNumVideos(filters).then(num => setNumVideos(num)), [filters]);
+  const fetchNumVideos = useCallback(() => getNumVideos(filters).then(num => setNumVideos(num)), [filters]);
+  const fetchFields = useCallback(() => getFields().then(newFields => setFields(newFields)), []);
 
   useEffect(() => {
-    refetchNumVideos();
-  }, [filters]);
+    fetchNumVideos();
+    fetchFields();
+  }, [fetchNumVideos, fetchFields]);
 
   const loadVideos = (start, end = start, filtersToUse = filters) => {
     return getVideos(start, end, filtersToUse).then(retrievedVideos => {
@@ -45,33 +52,57 @@ export default function Home() {
     const idsToDelete = selectedRows.map(rowIndex => videos[rowIndex]._id);
     await deleteVideos(idsToDelete);
     await loadVideos(firstRowIndex, videos.length);
-    await refetchNumVideos();
+    await fetchNumVideos();
     unselectAllRows();
   }
 
   const addFilter = async ({ key, comparison, value }) => {
-    const newFilters = { ...filters };
+    const newFilters = JSON.parse(JSON.stringify(filters)); // deep copy
     newFilters[key] = newFilters[key] || {};
     newFilters[key][comparison] = value;
     console.log(newFilters);
     setFilters(newFilters);
     setVideos([]);
+    await loadVideos(0, videos.length, newFilters);
   }
 
-  const keys = getKeys(videos, ['_id']);
+  const removeFilter = async (key, comparison) => {
+    const newFilters = JSON.parse(JSON.stringify(filters));
+    delete newFilters[key][comparison];
+    if (Object.keys(newFilters[key]).length === 0) {
+      delete newFilters[key];
+    }
+    setFilters(newFilters);
+    setVideos([]);
+    await loadVideos(0, videos.length, newFilters);
+  }
+
+  const handleSetFields = newFields => {
+    const newKeys = newFields.map(({ key }) => key);
+    const oldKeys = fields.map(({ key }) => key);
+    if (newKeys.join(',') !== oldKeys.join(',') && newFields.length > 0) {
+      reorderFields(newKeys).then(reorderedFields => setFields(reorderedFields));
+    }
+  }
 
   return (
     <div className={styles.home}>
       <Head>
-        <title>Video Organizer</title>
+        <title>Content Database</title>
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       </Head>
 
       <div className={styles['table-container']}>
+        <h1 className={styles.title}>Content Database</h1>
+        
         <div className={styles.buttons}>
+          <Popup modal trigger={<Button className={styles.button} variant="contained" color="primary">Add Field</Button>}>
+            {close => <AddFieldPopup close={close} onSubmit={field => addField(field).then(fetchFields)} />}
+          </Popup>
+
           <Popup modal trigger={<Button className={styles.button} variant="contained" color="primary">Add Video</Button>}>
-            {close => <AddVideoPopup keys={keys} close={close} onSubmit={video => addVideo(video).then(refetchNumVideos)} />}
+            {close => <AddVideoPopup fields={fields} close={close} onSubmit={video => addVideo(video).then(fetchNumVideos)} />}
           </Popup>
 
           <Popup
@@ -91,7 +122,7 @@ export default function Home() {
               <AddVideoPopup
                 editMode
                 video={videos[selectedRows[0]]}
-                keys={keys}
+                fields={fields}
                 close={close}
                 onSubmit={video => updateVideo(video).then(() => loadVideos(selectedRows[0])).then(unselectAllRows)}
               />
@@ -114,22 +145,31 @@ export default function Home() {
           <VideoTable
             numVideos={numVideos}
             videos={videos}
-            keys={keys}
+            fields={fields}
             loadMoreVideos={loadVideos}
             selectedRows={selectedRows}
             onCheckbox={handleTableCheckbox}
+            onDeleteField={key => deleteField(key).then(fetchFields)}
+            setFields={handleSetFields}
           />
 
           <div className={styles.filters}>
             <Popup modal trigger={<Button className={styles['filter-button']} variant="outlined">Add Filter</Button>}>
-              {close => <FilterPopup keys={keys} onSubmit={addFilter} close={close} />}
+              {close => <FilterPopup fields={fields} onSubmit={addFilter} close={close} />}
             </Popup>
 
-            {/* {Object.entries(filters).map(([key, filter]) => (
+            {Object.entries(filters).map(([key, filter]) => (
               Object.entries(filter).map(([comparison, value]) => (
-                <div className={styles.filter}></div>
+                // <div className={styles.filter}>{key} {comparisonOptions[comparison]} {value}</div>
+                <Chip
+                  className={styles.filter}
+                  label={`${key} ${comparisonOptions[comparison]} ${value}`}
+                  color="primary"
+                  size="small"
+                  onDelete={() => removeFilter(key, comparison)}
+                />
               ))
-            ))} */}
+            ))}
           </div>
         </div>
       </div>

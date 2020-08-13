@@ -1,4 +1,4 @@
-.filter-popup {
+.add-field-popup {
   .fields {
     display: flex;
     margin: 20px;
@@ -8,6 +8,7 @@
       margin: 0 10px;
       min-width: 100px;
       text-align: center;
+      align-self: flex-end;
     }
   }
   

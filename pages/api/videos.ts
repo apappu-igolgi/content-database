@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import nextConnect from 'next-connect';
 import * as yup from 'yup';
 import middleware, { ExtendedRequest, ExtendedResponse } from '../../middleware';
+import { Filters, filtersToQuery } from '../../util/server';
 
 const handler = nextConnect<NextApiRequest, NextApiResponse>();
 handler.use(middleware);
@@ -11,8 +12,6 @@ handler.get<ExtendedRequest, ExtendedResponse>((req, res) => {
   // Note: both start and end are inclusive
   const start = Number(req.query.start);
   const end = Number(req.query.end);
-  // type Filter = { [string]: { gt: number, lt: number, equals: string | number, contains: string | number }};
-  type Filters = any;
   const filters : Filters = req.query.filters ? JSON.parse(decodeURIComponent(<string>req.query.filters)) : undefined;
 
   const schema = yup.object().shape({
@@ -22,17 +21,7 @@ handler.get<ExtendedRequest, ExtendedResponse>((req, res) => {
   });
 
   schema.validate({ start, end, filters }).then(async () => {
-    let query = undefined;
-    if (filters) {
-      query = {};
-      Object.entries(filters).forEach(([key, { gt, lt, equals, contains }]) => {
-        query[key] = {};
-        if (typeof gt === 'number') query[key].$gt = gt;
-        if (typeof lt === 'number') query[key].$lt = lt;
-        if (typeof contains !== 'object') query[key] = { $text: { $search: contains } };
-        if (typeof equals !== 'object') query[key] = equals;
-      });
-    }
+    const query = await filtersToQuery(filters, req.db);
 
     const videos = await req.db.collection('videos')
       .find(query)
