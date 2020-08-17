@@ -46,7 +46,7 @@ const ItemWrapper = ({ data, index, style }) => {
   return <ItemRenderer index={index - stickyRows.length} style={style} />
 }
 
-export default function StickyList({ children, stickyRows, itemCount, ...props }) {
+const StickyList = React.forwardRef(({ children, stickyRows, itemCount, ...props }, ref) => {
   stickyRows = stickyRows || [];
   return (
     <StickyListContext.Provider value={{ stickyRows, itemSize: props.itemSize }}>
@@ -54,9 +54,12 @@ export default function StickyList({ children, stickyRows, itemCount, ...props }
         innerElementType={innerElementType}
         itemData={{ ItemRenderer: children, stickyRows }}
         itemCount={itemCount + stickyRows.length}
+        ref={ref}
         {...props}>
         {ItemWrapper}
       </List>
     </StickyListContext.Provider>
   )
-}
+});
+
+export default StickyList;

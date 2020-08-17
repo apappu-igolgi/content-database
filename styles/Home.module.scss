@@ -4,14 +4,14 @@
   width: 100%;
   overflow: hidden;
 
-  .table-container {
+  .content {
     height: 100%;
     width: 100%;
     margin: auto;
     display: flex;
     flex-direction: column;
     background-color: white;
-    padding: 35px 50px;
+    padding: 25px 50px;
 
     .title {
       color: #37352F;
@@ -19,32 +19,23 @@
       font-weight: 500;
       font-size: 2.1em;
       margin-top: 0;
+      margin-bottom: 10px;
     }
 
     .buttons {
-      margin-bottom: 25px;
+      margin-bottom: 15px;
+      white-space: nowrap;
+      overflow: auto;
 
       .button {
         margin: 0 7px;
       }
     }
 
-    .filter-table {
+    .table-container {
       flex: 1;
       display: flex;
-
-      .filters {
-        margin-left: 20px;
-
-        .filter-button {
-          margin-bottom: 10px;
-        }
-
-        .filter {
-          display: flex;
-          margin: 5px 0;
-        }
-      }
+      overflow: hidden;
     }
   }
 }

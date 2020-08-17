@@ -9,6 +9,7 @@ import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, compariso
 import AddVideoPopup from '../components/AddVideoPopup';
 import AddFieldPopup from '../components/AddFieldPopup';
 import FilterPopup from '../components/FilterPopup';
+import VideoView from '../components/VideoView';
 
 export default function Home() {
   const [fields, setFields] = useState([]);
@@ -25,10 +26,18 @@ export default function Home() {
   const fetchNumVideos = useCallback(() => getNumVideos(filters).then(num => setNumVideos(num)), [filters]);
   const fetchFields = useCallback(() => getFields().then(newFields => setFields(newFields)), []);
 
+  const resetTable = () => {
+    setVideos([]);
+    infiniteLoaderRef.current.resetloadMoreItemsCache(true);
+  }
+
   useEffect(() => {
-    fetchNumVideos();
+    fetchNumVideos().then(resetTable)
+  }, [fetchNumVideos]);
+  
+  useEffect(() => {
     fetchFields();
-  }, [fetchNumVideos, fetchFields]);
+  }, [fetchFields]);
 
   const loadVideos = (start, end = start, filtersToUse = filters) => {
     return getVideos(start, end, filtersToUse).then(retrievedVideos => {
@@ -37,16 +46,6 @@ export default function Home() {
       setVideos(newVideos);
     })
   }
-
-  // const handleTableCheckbox = (e, index) => {
-  //   if (e.target.checked) {
-  //     if (!selectedRows.includes(index)) {
-  //       setSelectedRows(selectedRows.concat(index));
-  //     }
-  //   } else {
-  //     setSelectedRows(selectedRows.filter(rowIndex => rowIndex != index));
-  //   }
-  // }
 
   const toggleSelection = index => {
     if (!selectedRows.includes(index)) {
@@ -59,23 +58,19 @@ export default function Home() {
   const unselectAllRows = () => setSelectedRows([]);
 
   const deleteSelected = async () => {
-    const firstRowIndex = Math.min(...selectedRows);
-    console.log(videos[selectedRows[0]]);
     const idsToDelete = selectedRows.map(rowIndex => videos[rowIndex]._id);
     await deleteVideos(idsToDelete);
-    await loadVideos(firstRowIndex, videos.length);
     await fetchNumVideos();
     unselectAllRows();
+    resetTable();
   }
 
   const addFilter = async ({ key, comparison, value }) => {
     const newFilters = JSON.parse(JSON.stringify(filters)); // deep copy
     newFilters[key] = newFilters[key] || {};
     newFilters[key][comparison] = value;
-    console.log(newFilters);
     setFilters(newFilters);
-    setVideos([]);
-    await loadVideos(0, videos.length, newFilters);
+    unselectAllRows();
   }
 
   const removeFilter = async (key, comparison) => {
@@ -85,8 +80,7 @@ export default function Home() {
       delete newFilters[key];
     }
     setFilters(newFilters);
-    setVideos([]);
-    await loadVideos(0, videos.length, newFilters);
+    unselectAllRows();
   }
 
   const handleReorderFields = newFields => {
@@ -97,11 +91,6 @@ export default function Home() {
     }
   }
 
-  const resetTable = () => {
-    setVideos([]);
-    infiniteLoaderRef.current.resetloadMoreItemsCache(true);
-  }
-
   return (
     <div className={styles.home}>
       <Head>
@@ -110,7 +99,7 @@ export default function Home() {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       </Head>
 
-      <div className={styles['table-container']}>
+      <div className={styles.content}>
         <h1 className={styles.title}>Content Database</h1>
         
         <div className={styles.buttons}>
@@ -155,43 +144,42 @@ export default function Home() {
           >
             Delete
           </Button>
+
+          <Popup modal trigger={<Button className={styles.button} variant="outlined">Add Filter</Button>}>
+            {close => <FilterPopup fields={fields} onSubmit={addFilter} close={close} />}
+          </Popup>
+
+          {Object.entries(filters).map(([key, filter]) => (
+            Object.entries(filter).map(([comparison, value]) => (
+              <Chip
+                className={styles.button}
+                label={`${key} ${comparisonOptions[comparison]} ${value}`}
+                color="primary"
+                size="small"
+                onDelete={() => removeFilter(key, comparison)}
+                key={`${key} ${comparisonOptions[comparison]} ${value}`}
+              />
+            ))
+          ))}
         </div>
 
-        <div className={styles['filter-table']}>
-          
+        <div className={styles['table-container']}>
           <VideoTable
             numVideos={numVideos}
             videos={videos}
             fields={fields}
             loadMoreVideos={loadVideos}
             selectedRows={selectedRows}
-            // onCheckbox={handleTableCheckbox}
             onRowSelect={toggleSelection}
-            // onDeleteField={key => deleteField(key).then(fetchFields)}
             editField={field => setEditingField(field)}
             onReorderFields={handleReorderFields}
             infiniteLoaderRef={infiniteLoaderRef}
-            // onUpdateField={field => updateField(field).then(fetchFields)}
           />
 
-          <div className={styles.filters}>
-            <Popup modal trigger={<Button className={styles['filter-button']} variant="outlined">Add Filter</Button>}>
-              {close => <FilterPopup fields={fields} onSubmit={addFilter} close={close} />}
-            </Popup>
-
-            {Object.entries(filters).map(([key, filter]) => (
-              Object.entries(filter).map(([comparison, value]) => (
-                // <div className={styles.filter}>{key} {comparisonOptions[comparison]} {value}</div>
-                <Chip
-                  className={styles.filter}
-                  label={`${key} ${comparisonOptions[comparison]} ${value}`}
-                  color="primary"
-                  size="small"
-                  onDelete={() => removeFilter(key, comparison)}
-                />
-              ))
-            ))}
-          </div>
+          <VideoView
+            videos={selectedRows.map(index => videos[index])}
+            fields={fields}
+          />
         </div>
       </div>
 

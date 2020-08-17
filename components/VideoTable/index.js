@@ -54,7 +54,7 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
       </div>
       {videos[index] ? (
         fields.map(({ key, type }) => (
-          <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key] }}>
+          <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key] }} key={key} title={rowElementByType[type](videos[index][key] || '')}>
             { rowElementByType[type](videos[index][key] || '')}
           </div>
         ))

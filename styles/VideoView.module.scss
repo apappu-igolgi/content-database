@@ -1,0 +1,44 @@
+.video-view {
+  width: 300px;
+  margin-left: 15px;
+  overflow: auto;
+
+  .video-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .icon {
+      font-size: 1.15em;
+    }
+  }
+
+  .video {
+    .filename {
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: 500;
+    }
+
+    .description {
+      font-size: .9em;
+      margin-top: 5px;
+      text-align: center;
+    }
+
+    .fields {
+      margin-top: 15px;
+
+      .field {
+        margin: 10px 5px;
+        .name {
+          font-size: .75em;
+          font-weight: 500;
+        }
+        .value {
+          text-align: right;
+        }
+      }
+    }
+  }
+}
