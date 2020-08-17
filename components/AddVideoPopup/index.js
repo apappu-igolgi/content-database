@@ -2,12 +2,12 @@ import { Formik, Form, Field } from 'formik';
 import { Button, TextField } from '@material-ui/core';
 
 import styles from '../../styles/AddVideoPopup.module.scss';
-import FileUpload from '../ImageUpload';
+import ImageUpload from '../ImageUpload';
 
 const fieldPropsByType = {
   number: { as: TextField, variant: 'outlined' },
   string: { as: TextField, variant: 'outlined' },
-  image: { as: FileUpload },
+  image: { as: ImageUpload, maxSizeMB: .01 },
 }
 
 const AddVideoPopup = ({ fields, close, onSubmit, editMode, video }) => {
@@ -21,11 +21,11 @@ const AddVideoPopup = ({ fields, close, onSubmit, editMode, video }) => {
           <div className={styles.title}>Add Video</div>
 
           <div className={styles.fields}>
-            {fields.map(({ key, name, type }) => (
+            {fields.map(({ key, type }) => (
               <Field
                 className={styles.field}
                 name={key}
-                label={name}
+                label={key}
                 {...fieldPropsByType[type]}
               />
             ))}

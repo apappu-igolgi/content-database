@@ -13,7 +13,7 @@ export type Filters = { [key: string]: { gt: number, lt: number, equals: string 
 export const getFields = (db: Db) => db.collection('fields').find().toArray();
 
 export const getFieldToTypeMap = async (db: Db): Promise<{ [key: string]: FieldType }> => {
-  const fields = <[Field]>(await getFields(db))
+  const { fields } = await db.collection('fields').findOne({});
   const fieldToType = {};
   fields.forEach(({ key, type }) => fieldToType[key] = type);
   return fieldToType;

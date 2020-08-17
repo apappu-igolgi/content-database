@@ -7,7 +7,7 @@ const handler = nextConnect<NextApiRequest, NextApiResponse>();
 handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
-  const {_id, ...video} = JSON.parse(req.body)
+  const { _id, ...video } = req.body
   try {
     await req.db.collection('videos').updateOne({ _id: new ObjectID(_id) }, { $set: video });
   } catch(e) {

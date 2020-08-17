@@ -7,7 +7,7 @@ handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
   // TODO: validate using yup
-  const { keys } = JSON.parse(req.body);
+  const { keys } = req.body;
   const { fields } = await req.db.collection('fields').findOne({})
 
   const keyToFieldMap = {};

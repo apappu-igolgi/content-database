@@ -12,7 +12,7 @@ handler.use(middleware);
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
   handleErrors(res, async () => {
     const idsToDelete = req.body;
-    await yup.array().of(yup.number().integer()).validate(idsToDelete);
+    await yup.array().of(yup.string()).validate(idsToDelete);
     const { deletedCount } = await req.db.collection('videos').deleteMany({ _id: { $in: idsToDelete.map(id => new ObjectID(id)) }});
     res.statusCode = 200;
     res.json(deletedCount);

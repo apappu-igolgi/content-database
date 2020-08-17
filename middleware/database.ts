@@ -13,7 +13,7 @@ export default async function database(req: NextApiRequest & RequestWithDB, res:
   }
 
   req.dbClient = client;
-  req.db = client.db('video-organizer');
+  req.db = client.db('content-database');
   
   return next();
 }

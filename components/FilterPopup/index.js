@@ -8,6 +8,7 @@ import { useState } from 'react';
 const allowedOperatorsByType = {
   number: ['gt', 'lt', 'equals'],
   string: ['equals', 'contains'],
+  image: [''],
 }
 
 const FilterPopup = ({ fields, onSubmit, close }) => {
@@ -19,8 +20,8 @@ const FilterPopup = ({ fields, onSubmit, close }) => {
         <Form className={styles['filter-popup']}>
           <div className={styles.fields}>
             <Field className={styles.field} as={Select} name="key">
-              {fields.map(({ key, name, type }) => (
-                <MenuItem value={key} onClick={() => setAllowedOperations(allowedOperatorsByType[type])}>{name}</MenuItem>
+              {fields.map(({ key, type }) => (
+                <MenuItem value={key} onClick={() => setAllowedOperations(allowedOperatorsByType[type])}>{key}</MenuItem>
               ))}
             </Field>
 

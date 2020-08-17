@@ -13,20 +13,6 @@ export const formatCamelCase = camelCase => {
 
 export const capitalize = word => word[0].toUpperCase() + word.slice(1);
 
-export const fieldNameToKey = name => {
-  const [firstWord, ...remainingWords] = name.split(' ');
-  const key = firstWord.toLowerCase() + remainingWords.map(word => capitalize(word.toLowerCase())).join('');
-  return key.replace(/[\-'"\)\(]/g, ''); // remove any special characters
-}
-
-export const getNumVideos = filters => (
-  fetch(`/api/video-count?filters=${encodeURIComponent(JSON.stringify(filters))}`).then(res => res.json())
-);
-
-export const getVideos = (start, end, filters) => (
-  fetch(`/api/videos?start=${start}&end=${end}&filters=${encodeURIComponent(JSON.stringify(filters))}`).then(res => res.json())
-);
-
 export const getKeys = (objects, keysToExclude = []) => {
   if (!Array.isArray(objects)) return [];
   const keys = new Set();
@@ -39,34 +25,34 @@ export const getKeys = (objects, keysToExclude = []) => {
   return Array.from(keys);
 };
 
-export const addVideo = video => fetch('/api/add-video', {
-  method: 'POST',
-  body: JSON.stringify(video),
+const request = (method, url, data) => fetch(url, {
+  method,
+  body: JSON.stringify(data),
+  headers: {
+    'Content-Type': 'application/json',
+  }
 }).then(res => res.json());
 
-export const updateVideo = video => fetch('/api/update-video', {
-  method: 'POST',
-  body: JSON.stringify(video),
-}).then(res => res.json());
+export const getNumVideos = filters => (
+  request('GET', `/api/video-count?filters=${encodeURIComponent(JSON.stringify(filters))}`)
+);
 
-export const deleteVideos = ids => fetch('/api/delete-videos', {
-  method: 'POST',
-  body: JSON.stringify(ids) 
-}).then(res => res.json());
+export const getVideos = (start, end, filters) => (
+  request('GET', `/api/videos?start=${start}&end=${end}&filters=${encodeURIComponent(JSON.stringify(filters))}`)
+);
 
-export const getFields = () => fetch('/api/fields').then(res => res.json());
+export const addVideo = video => request('POST', '/api/add-video', video);
 
-export const addField = ({ name, type }) => fetch('/api/add-field', {
-  method: 'POST',
-  body: JSON.stringify({ key: fieldNameToKey(name), name, type }),
-}).then(res => res.json());
+export const updateVideo = video => request('POST', '/api/update-video', video);
 
-export const deleteField = key => fetch('/api/delete-field', {
-  method: 'POST',
-  body: JSON.stringify({ key }),
-}).then(res => res.json());
+export const deleteVideos = ids => request('POST', '/api/delete-videos', ids);
 
-export const reorderFields = keys => fetch('/api/reorder-fields', {
-  method: 'POST',
-  body: JSON.stringify({ keys })
-}).then(res => res.json());
+export const getFields = () => request('GET', '/api/fields');
+
+export const addField = ({ key, type }) => request('POST', '/api/add-field', { key, type });
+
+export const updateField = ({ oldKey, key, type }) => request('POST', '/api/update-field', { oldKey, key, type })
+
+export const deleteField = key => request('POST', '/api/delete-field', { key });
+
+export const reorderFields = keys => request('POST', '/api/reorder-fields', { keys });

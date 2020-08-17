@@ -6,7 +6,7 @@ const handler = nextConnect<NextApiRequest, NextApiResponse>();
 handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
-  const video = JSON.parse(req.body);
+  const video = req.body;
   await req.db.collection('videos').insertOne(video);
   res.statusCode = 200;
   res.json(video);

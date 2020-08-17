@@ -1,6 +1,6 @@
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { Checkbox, IconButton } from '@material-ui/core';
-import { CancelOutlined } from '@material-ui/icons';
+import { EditOutlined } from '@material-ui/icons';
 import { useMemo } from 'react';
 import clsx from 'clsx';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -8,15 +8,33 @@ import { ReactSortable } from 'react-sortablejs';
 
 import styles from '../../styles/VideoTable.module.scss';
 import StickyList from '../StickyList';
+import AddFieldPopup from '../AddFieldPopup';
+
+
+const imageWidth = 40;
+
+const rowElementByType = {
+  number: value => value,
+  string: value => value,
+  image: value => <img src={value} width={imageWidth} />
+}
+
+const elementWidthByType = {
+  number: value => String(value || '').length * 10,
+  string: value => String(value || '').length * 10,
+  image: () => imageWidth,
+}
 
 const findMax = arr => arr.reduce((max, current) => Math.max(max, current), -Infinity)
 
-const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, onCheckbox, onDeleteField, setFields }) => {
+const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, onRowSelect, editField, onReorderFields, infiniteLoaderRef }) => {
   const widths = useMemo(() => {
     const widthsByKey = {};
-    fields.forEach(({ key, name }) => {
-      const maxValueLength = findMax(videos.map(video => String(video[key] || '').length).concat(name.length));
-      widthsByKey[key] = maxValueLength * 10 + 30;
+    fields.forEach(({ key, type }) => {
+      widthsByKey[key] = findMax(
+        videos.map(video => elementWidthByType[type](video[key]))
+        .concat(elementWidthByType.string(key))
+      ) + 30;
     });
     return widthsByKey;
   }, [videos, fields]);
@@ -29,14 +47,16 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
   const checkboxWidth = 50;
 
   const Row = ({ index, style }) => (
-    <div style={style} className={styles.row}>
+    <div style={style} className={styles.row} onClick={() => onRowSelect(index)}>
       <div className={clsx(styles.element, styles['row-number'])} style={{ width: rowNumberWidth }}>{index + 1}</div>
       <div className={clsx(styles.element, styles.checkbox)} style={{ width: checkboxWidth }}>
-        <Checkbox checked={selectedRows.includes(index)} onChange={e => onCheckbox(e, index)} />
+        <Checkbox checked={selectedRows.includes(index)} />
       </div>
       {videos[index] ? (
-        fields.map(({ key }) => (
-          <div className={styles.element} style={{ width: widths[key] }}>{videos[index][key] || ''}</div>
+        fields.map(({ key, type }) => (
+          <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key] }}>
+            { rowElementByType[type](videos[index][key] || '')}
+          </div>
         ))
       ) : (
         'Loading...'
@@ -46,12 +66,12 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
 
   const getHeaderRows = () => ([
     <div className={clsx(styles.row, styles.header)}>
-      <ReactSortable list={fields} setList={setFields}>
-        {fields.map(({ key, name }) => (
-          <div className={styles.element} style={{ width: widths[key], left: checkboxWidth + rowNumberWidth }} key={key}>
-            {name}
-            <IconButton className={styles['delete-icon']} aria-label="delete" onClick={() => onDeleteField(key)}>
-              <CancelOutlined style={{ fontSize: '.8em' }} />
+      <ReactSortable list={fields} setList={onReorderFields}>
+        {fields.map(({ key, type }) => (
+          <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key], left: checkboxWidth + rowNumberWidth }} key={key}>
+            {key}
+            <IconButton className={styles['edit-icon']} aria-label="edit" onClick={() => editField({ key, type })}>
+              <EditOutlined style={{ fontSize: '.8em' }} />
             </IconButton>
           </div>
         ))}
@@ -68,9 +88,10 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
             isItemLoaded={index => !!videos[index]}
             itemCount={numVideos}
             loadMoreItems={loadMoreVideos}
-            minimumBatchSize={100}
+            minimumBatchSize={50}
+            ref={infiniteLoaderRef}
           >
-            {({ onItemsRendered, ref}) => (
+            {({ onItemsRendered, ref }) => (
               <StickyList
                 height={height}
                 width={width}

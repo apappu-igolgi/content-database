@@ -4,6 +4,7 @@
   .row {
     width: fit-content;
     white-space: nowrap;
+    cursor: pointer;
 
     &.header {
       color: #444444;
@@ -14,11 +15,11 @@
         align-items: center;
         position: relative;
         cursor: grab;
-        .delete-icon {
+        .edit-icon {
           visibility: hidden;
         }
 
-        &:hover .delete-icon {
+        &:hover .edit-icon {
           visibility: visible;
         }
       }
@@ -27,6 +28,13 @@
     .element {
       display: inline-block;
       width: 200px;
+      max-width: 500px;
+      overflow: hidden;
+      vertical-align: middle;
+      text-overflow: ellipsis;
+      &.normal {
+        margin-right: 20px;
+      }
       &.row-number {
         font-weight: 600;
         font-family: monospace;

@@ -6,7 +6,7 @@ const handler = nextConnect<NextApiRequest, NextApiResponse>();
 handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
-  const { key } = JSON.parse(req.body);
+  const { key } = req.body;
   const { fields } = await req.db.collection('fields').findOne({})
   const newFields = fields.filter(field => field.key !== key);
   await req.db.collection('fields').findOneAndReplace({}, { fields: newFields });

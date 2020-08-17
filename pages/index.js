@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import Popup from 'reactjs-popup';
 import { Button, Chip } from '@material-ui/core';
+
 import styles from '../styles/Home.module.scss';
 import VideoTable from '../components/VideoTable';
-import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, comparisonOptions, getFields, addField, deleteField, reorderFields } from '../util/videos';
+import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, comparisonOptions, getFields, addField, deleteField, reorderFields, updateField } from '../util/videos';
 import AddVideoPopup from '../components/AddVideoPopup';
 import AddFieldPopup from '../components/AddFieldPopup';
 import FilterPopup from '../components/FilterPopup';
@@ -14,6 +15,8 @@ export default function Home() {
   const [numVideos, setNumVideos] = useState(0);
   const [videos, setVideos] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [editingField, setEditingField] = useState(null);
+  const infiniteLoaderRef = useRef(null);
 
   // filters has the following format:
   // { [key]: { [comparison]: value, [comparison2]: value2, ... }, ...}
@@ -35,11 +38,19 @@ export default function Home() {
     })
   }
 
-  const handleTableCheckbox = (e, index) => {
-    if (e.target.checked) {
-      if (!selectedRows.includes(index)) {
-        setSelectedRows(selectedRows.concat(index));
-      }
+  // const handleTableCheckbox = (e, index) => {
+  //   if (e.target.checked) {
+  //     if (!selectedRows.includes(index)) {
+  //       setSelectedRows(selectedRows.concat(index));
+  //     }
+  //   } else {
+  //     setSelectedRows(selectedRows.filter(rowIndex => rowIndex != index));
+  //   }
+  // }
+
+  const toggleSelection = index => {
+    if (!selectedRows.includes(index)) {
+      setSelectedRows(selectedRows.concat(index));
     } else {
       setSelectedRows(selectedRows.filter(rowIndex => rowIndex != index));
     }
@@ -49,6 +60,7 @@ export default function Home() {
 
   const deleteSelected = async () => {
     const firstRowIndex = Math.min(...selectedRows);
+    console.log(videos[selectedRows[0]]);
     const idsToDelete = selectedRows.map(rowIndex => videos[rowIndex]._id);
     await deleteVideos(idsToDelete);
     await loadVideos(firstRowIndex, videos.length);
@@ -77,12 +89,17 @@ export default function Home() {
     await loadVideos(0, videos.length, newFilters);
   }
 
-  const handleSetFields = newFields => {
+  const handleReorderFields = newFields => {
     const newKeys = newFields.map(({ key }) => key);
     const oldKeys = fields.map(({ key }) => key);
     if (newKeys.join(',') !== oldKeys.join(',') && newFields.length > 0) {
       reorderFields(newKeys).then(reorderedFields => setFields(reorderedFields));
     }
+  }
+
+  const resetTable = () => {
+    setVideos([]);
+    infiniteLoaderRef.current.resetloadMoreItemsCache(true);
   }
 
   return (
@@ -148,9 +165,13 @@ export default function Home() {
             fields={fields}
             loadMoreVideos={loadVideos}
             selectedRows={selectedRows}
-            onCheckbox={handleTableCheckbox}
-            onDeleteField={key => deleteField(key).then(fetchFields)}
-            setFields={handleSetFields}
+            // onCheckbox={handleTableCheckbox}
+            onRowSelect={toggleSelection}
+            // onDeleteField={key => deleteField(key).then(fetchFields)}
+            editField={field => setEditingField(field)}
+            onReorderFields={handleReorderFields}
+            infiniteLoaderRef={infiniteLoaderRef}
+            // onUpdateField={field => updateField(field).then(fetchFields)}
           />
 
           <div className={styles.filters}>
@@ -173,6 +194,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <Popup open={!!editingField} modal onClose={() => setEditingField(null)}>
+        {close => (
+          <AddFieldPopup
+            close={close}
+            onSubmit={field => updateField({ oldKey: editingField.key, ...field }).then(fetchFields).then(resetTable)}
+            field={editingField}
+            editMode
+          />
+        )}
+      </Popup>
     </div>
   )
 }

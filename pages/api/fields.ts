@@ -7,7 +7,6 @@ handler.use(middleware);
 
 handler.get<ExtendedRequest, ExtendedResponse>(async (req, res) => {
   const { fields } = await req.db.collection('fields').findOne({});
-  console.log('fields', fields);
   res.statusCode = 200;
   res.json(fields);
 });

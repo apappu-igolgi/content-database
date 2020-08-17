@@ -7,9 +7,9 @@ handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
   // TODO: validate using yup
-  const { key, name, type } = JSON.parse(req.body);
+  const { key, type } = req.body;
   const { fields } = await req.db.collection('fields').findOne({})
-  const newFields = fields.concat({ key, name, type });
+  const newFields = fields.concat({ key, type });
   await req.db.collection('fields').findOneAndReplace({}, { fields: newFields });
   res.statusCode = 200;
   res.json({}); // TODO
