@@ -1,26 +1,38 @@
+import { useState } from 'react';
 import { Select, MenuItem, Input, TextField, Button } from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
+import { Alert } from '@material-ui/lab'
 
 import styles from '../../styles/FilterPopup.module.scss';
-import { formatCamelCase, comparisonOptions } from '../../util/videos';
-import { useState } from 'react';
+import { comparisonOptions } from '../../util/videos';
 
 const allowedOperatorsByType = {
   number: ['gt', 'lt', 'equals'],
   string: ['equals', 'contains'],
-  image: [''],
 }
 
 const FilterPopup = ({ fields, onSubmit, close }) => {
-  const [allowedOperations, setAllowedOperations] = useState(allowedOperatorsByType[fields[0].type]);
+  const filterableFields = fields.filter(
+    ({ type }) => allowedOperatorsByType[type] && allowedOperatorsByType[type].length > 0
+  );
+
+  if (filterableFields.length === 0) {
+    return <Alert severity="error" onClose={close}>No filterable fields.</Alert>
+  }
+  const firstField = filterableFields[0];
+
+  const [allowedOperations, setAllowedOperations] = useState(allowedOperatorsByType[firstField.type]);
 
   return (
-    <Formik initialValues={{ key: fields[0].key, comparison: 'equals' }} onSubmit={values => onSubmit(values).then(() => close())}>
+    <Formik
+      initialValues={{ key: firstField.key, comparison: allowedOperatorsByType[firstField.type][0] }}
+      onSubmit={values => onSubmit(values).then(() => close())}
+    >
       {({ isSubmitting }) => (
         <Form className={styles['filter-popup']}>
           <div className={styles.fields}>
             <Field className={styles.field} as={Select} name="key">
-              {fields.map(({ key, type }) => (
+              {filterableFields.map(({ key, type }) => (
                 <MenuItem value={key} onClick={() => setAllowedOperations(allowedOperatorsByType[type])}>{key}</MenuItem>
               ))}
             </Field>
