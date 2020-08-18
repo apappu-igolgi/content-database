@@ -1,11 +1,11 @@
 import { Db } from "mongodb";
 import { NextApiResponse } from "next";
 
-export type FieldType = "number" | "string"
+export type FieldType = "number" | "string" | "image"
 export type Field = {
   key: string,
-  name: string,
-  type: FieldType
+  type: FieldType,
+  locked?: boolean,
 }
 
 export type Filters = { [key: string]: { gt: number, lt: number, equals: string | number, contains: string | number } };

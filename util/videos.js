@@ -49,9 +49,9 @@ export const deleteVideos = ids => request('POST', '/api/delete-videos', ids);
 
 export const getFields = () => request('GET', '/api/fields');
 
-export const addField = ({ key, type }) => request('POST', '/api/add-field', { key, type });
+export const addField = field => request('POST', '/api/add-field', field);
 
-export const updateField = ({ oldKey, key, type }) => request('POST', '/api/update-field', { oldKey, key, type })
+export const updateField = (oldKey, field) => request('POST', '/api/update-field', { oldKey, field })
 
 export const deleteField = key => request('POST', '/api/delete-field', { key });
 

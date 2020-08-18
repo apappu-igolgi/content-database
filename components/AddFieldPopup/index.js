@@ -6,8 +6,8 @@ import { capitalize } from '../../util/videos';
 
 const types = ['number', 'string', 'image'];
 
-const AddFieldPopup = ({ onSubmit, close, field, editMode = false }) => (
-  <Formik initialValues={editMode ? field : { key: '', type: types[0] }} onSubmit={values => onSubmit(values).then(() => close())}>
+const AddFieldPopup = ({ onSubmit, close, field, editMode = false, onDelete }) => (
+  <Formik initialValues={editMode ? field : { key: '', type: types[0] }} onSubmit={values => onSubmit(values).then(close)}>
     {({ isSubmitting }) => (
       <Form className={styles['add-field-popup']}>
         <div className={styles.fields}>
@@ -21,8 +21,23 @@ const AddFieldPopup = ({ onSubmit, close, field, editMode = false }) => (
         </div>
 
         <div className={styles.buttons}>
-          <Button type="button" variant="outlined" onClick={close}>Cancel</Button>
+          <Button className={styles.button} type="button" variant="outlined" onClick={close}>Cancel</Button>
+          <div className={styles.spacer} />
+
+          {editMode && (
+            <Button
+              className={styles.button}
+              variant="outlined"
+              color="secondary"
+              onClick={() => confirm('Are you sure you want to delete this field?') && onDelete(field.key).then(close)}
+              disabled={isSubmitting}
+            >
+              Delete
+            </Button>
+          )}
+
           <Button
+            className={styles.button}
             type="submit"
             variant="outlined"
             color="primary"

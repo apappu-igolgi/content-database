@@ -14,10 +14,16 @@
   
 
   .buttons {
-    // width: 100%;
     margin: 15px 6%;
     margin-top: 40px;
     display: flex;
-    justify-content: space-between;
+
+    .spacer {
+      flex: 1;
+    }
+
+    .button {
+      margin: 0 5px;
+    }
   }
 }

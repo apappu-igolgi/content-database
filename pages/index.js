@@ -104,7 +104,7 @@ export default function Home() {
         
         <div className={styles.buttons}>
           <Popup modal trigger={<Button className={styles.button} variant="contained" color="primary">Add Field</Button>}>
-            {close => <AddFieldPopup close={close} onSubmit={field => addField(field).then(fetchFields)} />}
+            {close => <AddFieldPopup close={close} onSubmit={field => addField(field).then(newFields => setFields(newFields))} />}
           </Popup>
 
           <Popup modal trigger={<Button className={styles.button} variant="contained" color="primary">Add Video</Button>}>
@@ -187,8 +187,9 @@ export default function Home() {
         {close => (
           <AddFieldPopup
             close={close}
-            onSubmit={field => updateField({ oldKey: editingField.key, ...field }).then(fetchFields).then(resetTable)}
+            onSubmit={field => updateField(editingField.key, field).then(newFields => setFields(newFields)).then(resetTable)}
             field={editingField}
+            onDelete={key => deleteField(key).then(newFields => setFields(newFields))}
             editMode
           />
         )}

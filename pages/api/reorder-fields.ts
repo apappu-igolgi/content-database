@@ -1,21 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import nextConnect from 'next-connect';
 import middleware, { ExtendedRequest, ExtendedResponse } from '../../middleware';
+import { Field } from '../../util/server';
 
 const handler = nextConnect<NextApiRequest, NextApiResponse>();
 handler.use(middleware);
 
 handler.post<ExtendedRequest, ExtendedResponse>(async (req, res) => {
   // TODO: validate using yup
-  const { keys } = req.body;
-  const { fields } = await req.db.collection('fields').findOne({})
+  const { keys }: { keys: [string] } = req.body;
+  const { fields }: { fields: [Field] } = await req.db.collection('fields').findOne({})
 
-  const keyToFieldMap = {};
+  const keyToFieldMap: { [key: string]: Field } = {};
   fields.forEach(field => keyToFieldMap[field.key] = field);
   const newFields = keys.map(key => keyToFieldMap[key]);
-
-  console.log('reorder')
-  console.log(newFields);
 
   await req.db.collection('fields').findOneAndReplace({}, { fields: newFields });
 

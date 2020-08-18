@@ -5,7 +5,7 @@ import styles from '../../styles/AddVideoPopup.module.scss';
 import ImageUpload from '../ImageUpload';
 
 const fieldPropsByType = {
-  number: { as: TextField, variant: 'outlined' },
+  number: { as: TextField, variant: 'outlined', type: 'number' },
   string: { as: TextField, variant: 'outlined' },
   image: { as: ImageUpload, maxSizeMB: .01 },
 }

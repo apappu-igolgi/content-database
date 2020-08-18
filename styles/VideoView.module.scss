@@ -14,6 +14,13 @@
   }
 
   .video {
+    .thumbnail {
+      margin: 0 auto;
+      margin-bottom: 10px;
+      display: block;
+      max-width: 90%;
+    }
+
     .filename {
       text-align: center;
       font-size: 1.1em;

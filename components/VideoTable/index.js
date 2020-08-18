@@ -10,31 +10,39 @@ import styles from '../../styles/VideoTable.module.scss';
 import StickyList from '../StickyList';
 import AddFieldPopup from '../AddFieldPopup';
 
-
-const imageWidth = 40;
+const rowHeight = 40;
+const maxImageSize = rowHeight - 5;
 
 const rowElementByType = {
   number: value => value,
   string: value => value,
-  image: value => <img src={value} width={imageWidth} />
+  image: value => <div style={{ backgroundImage: `url("${value}")`, width: maxImageSize, height: maxImageSize, backgroundSize: 'contain' }} />
 }
 
 const elementWidthByType = {
   number: value => String(value || '').length * 10,
   string: value => String(value || '').length * 10,
-  image: () => imageWidth,
+  image: () => maxImageSize,
 }
+
+// Thumbnail is special field that doesn't follow the normal rules specified for the other fields
+const thumbnailException = (key, normal, alternate) => key === 'Thumbnail' ? alternate : normal;
 
 const findMax = arr => arr.reduce((max, current) => Math.max(max, current), -Infinity)
 
-const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, onRowSelect, editField, onReorderFields, infiniteLoaderRef }) => {
+const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, onRowSelect, editField, onReorderFields, infiniteLoaderRef, unselectAll }) => {
   const widths = useMemo(() => {
     const widthsByKey = {};
+    // for each field, finds the value with the maximum width and sets all the element widths for that field to that width
     fields.forEach(({ key, type }) => {
-      widthsByKey[key] = findMax(
-        videos.map(video => elementWidthByType[type](video[key]))
-        .concat(elementWidthByType.string(key))
-      ) + 30;
+      widthsByKey[key] = thumbnailException(
+        key,
+        findMax(
+          videos.map(video => elementWidthByType[type](video[key]))
+          .concat(elementWidthByType.string(key)) // add the header element as well (which displays the key)
+        ) + 30, // add 30 for margin between fields
+        maxImageSize, // if this is the thumbnail field, we want the field width to just be the image width (not going to display header element)
+      );
     });
     return widthsByKey;
   }, [videos, fields]);
@@ -46,11 +54,18 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
   const rowNumberWidth = String(videos.length).length * 9;
   const checkboxWidth = 50;
 
+  const handleCheckboxKeyPress = (e, index) => {
+    if (e.key === 'Enter') {
+    console.log(e.which);
+      onRowSelect(index)
+    }
+  }
+
   const Row = ({ index, style }) => (
-    <div style={style} className={styles.row} onClick={() => onRowSelect(index)}>
+    <div style={style} className={styles.row} onMouseDown={() => onRowSelect(index)}>
       <div className={clsx(styles.element, styles['row-number'])} style={{ width: rowNumberWidth }}>{index + 1}</div>
       <div className={clsx(styles.element, styles.checkbox)} style={{ width: checkboxWidth }}>
-        <Checkbox checked={selectedRows.includes(index)} />
+        <Checkbox checked={selectedRows.includes(index)} onKeyPress={e => handleCheckboxKeyPress(e, index)} />
       </div>
       {videos[index] ? (
         fields.map(({ key, type }) => (
@@ -67,12 +82,15 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
   const getHeaderRows = () => ([
     <div className={clsx(styles.row, styles.header)}>
       <ReactSortable list={fields} setList={onReorderFields}>
-        {fields.map(({ key, type }) => (
+        {fields.map(({ key, type, locked }) => (
           <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key], left: checkboxWidth + rowNumberWidth }} key={key}>
-            {key}
-            <IconButton className={styles['edit-icon']} aria-label="edit" onClick={() => editField({ key, type })}>
-              <EditOutlined style={{ fontSize: '.8em' }} />
-            </IconButton>
+            {thumbnailException(key, key, '')}
+
+            {!locked && ( // only display option to edit field if it's not locked
+              <IconButton className={styles['edit-icon']} aria-label="edit" onClick={() => editField({ key, type })}>
+                <EditOutlined style={{ fontSize: '.8em' }} />
+              </IconButton>
+            )}
           </div>
         ))}
       </ReactSortable>
@@ -96,7 +114,7 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
                 height={height}
                 width={width}
                 itemCount={numVideos}
-                itemSize={35}
+                itemSize={rowHeight}
                 onItemsRendered={onItemsRendered}
                 ref={ref}
                 stickyRows={getHeaderRows()}

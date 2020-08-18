@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 import { useState, useEffect, useMemo } from 'react';
 import { IconButton } from '@material-ui/core';
 
-const hardcodedFields = ['Filename', 'Description'];
+const hardcodedFields = ['Thumbnail', 'Filename', 'Description'];
 
 const VideoView = ({ videos, fields }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -33,6 +33,7 @@ const VideoView = ({ videos, fields }) => {
       </div>
 
       <div className={styles.video}>
+        {selectedVideo['Thumbnail'] && <img className={styles.thumbnail} src={selectedVideo['Thumbnail']} alt="Thumbnail" />}
         <div className={styles.filename}>{selectedVideo['Filename']}</div>
         <div className={styles.description}>{selectedVideo['Description']}</div>
         <div className={styles.fields}>

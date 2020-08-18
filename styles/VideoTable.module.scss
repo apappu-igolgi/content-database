@@ -2,9 +2,13 @@
   flex: 1;
   
   .row {
-    width: fit-content;
+    min-width: 100%;
+    width: fit-content !important; // react-window sets the width to 100%, which we want to override
     white-space: nowrap;
-    cursor: pointer;
+    padding-left: 15px;
+    &:hover {
+      background-color: #f3f3f3;
+    }
 
     &.header {
       color: #444444;
