@@ -5,7 +5,7 @@ import { Button, Chip } from '@material-ui/core';
 
 import styles from '../styles/Home.module.scss';
 import VideoTable from '../components/VideoTable';
-import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, comparisonOptions, getFields, addField, deleteField, reorderFields, updateField } from '../util/videos';
+import { getNumVideos, getVideos, addVideo, deleteVideos, updateVideo, getFields, addField, deleteField, reorderFields, updateField } from '../util/requests';
 import AddVideoPopup from '../components/AddVideoPopup';
 import AddFieldPopup from '../components/AddFieldPopup';
 import FilterPopup from '../components/FilterPopup';
@@ -20,7 +20,7 @@ export default function Home() {
   const infiniteLoaderRef = useRef(null);
 
   // filters has the following format:
-  // { [key]: { [comparison]: value, [comparison2]: value2, ... }, ...}
+  // { [key]: { [comparison operator]: value, [operator 2]: value2, ... }, ...}
   const [filters, setFilters] = useState({});
 
   const fetchNumVideos = useCallback(() => getNumVideos(filters).then(num => setNumVideos(num)), [filters]);
@@ -59,8 +59,8 @@ export default function Home() {
 
   const deleteSelected = async () => {
     const idsToDelete = selectedRows.map(rowIndex => videos[rowIndex]._id);
-    await deleteVideos(idsToDelete);
-    await fetchNumVideos();
+    const newNumVideos = await deleteVideos(idsToDelete);
+    setNumVideos(newNumVideos);
     unselectAllRows();
     resetTable();
   }
@@ -91,6 +91,14 @@ export default function Home() {
     }
   }
 
+  const handleUpdateVideo = async video => {
+    const updatedVideo = await updateVideo(video);
+    const newVideos = videos.slice(0);
+    newVideos[selectedRows[0]] = updatedVideo;
+    setVideos(newVideos);
+    unselectAllRows();
+  }
+
   return (
     <div className={styles.home}>
       <Head>
@@ -108,7 +116,13 @@ export default function Home() {
           </Popup>
 
           <Popup modal trigger={<Button className={styles.button} variant="contained" color="primary">Add Video</Button>}>
-            {close => <AddVideoPopup fields={fields} close={close} onSubmit={video => addVideo(video).then(fetchNumVideos)} />}
+            {close => (
+              <AddVideoPopup
+                fields={fields}
+                close={close}
+                onSubmit={video => addVideo(video).then(newNumVideos => setNumVideos(newNumVideos))}
+              />
+            )}
           </Popup>
 
           <Popup
@@ -130,7 +144,7 @@ export default function Home() {
                 video={videos[selectedRows[0]]}
                 fields={fields}
                 close={close}
-                onSubmit={video => updateVideo(video).then(() => loadVideos(selectedRows[0])).then(unselectAllRows)}
+                onSubmit={handleUpdateVideo}
               />
             )}
           </Popup>
@@ -153,11 +167,11 @@ export default function Home() {
             Object.entries(filter).map(([comparison, value]) => (
               <Chip
                 className={styles.button}
-                label={`${key} ${comparisonOptions[comparison]} ${value}`}
+                label={`${key} ${comparison} ${value}`}
                 color="primary"
                 size="small"
                 onDelete={() => removeFilter(key, comparison)}
-                key={`${key} ${comparisonOptions[comparison]} ${value}`}
+                key={`${key} ${comparison} ${value}`}
               />
             ))
           ))}

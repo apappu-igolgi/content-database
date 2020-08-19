@@ -62,15 +62,20 @@ const VideoTable = ({ numVideos, videos, fields, loadMoreVideos, selectedRows, o
   }
 
   const Row = ({ index, style }) => (
-    <div style={style} className={styles.row} onMouseDown={() => onRowSelect(index)}>
+    <div style={style} className={clsx(styles.row, selectedRows.includes(index) && styles.selected)} onMouseDown={() => onRowSelect(index)}>
       <div className={clsx(styles.element, styles['row-number'])} style={{ width: rowNumberWidth }}>{index + 1}</div>
       <div className={clsx(styles.element, styles.checkbox)} style={{ width: checkboxWidth }}>
         <Checkbox checked={selectedRows.includes(index)} onKeyPress={e => handleCheckboxKeyPress(e, index)} />
       </div>
       {videos[index] ? (
         fields.map(({ key, type }) => (
-          <div className={clsx(styles.element, styles.normal)} style={{ width: widths[key] }} key={key} title={rowElementByType[type](videos[index][key] || '')}>
-            { rowElementByType[type](videos[index][key] || '')}
+          <div
+            className={clsx(styles.element, styles.normal)}
+            style={{ width: widths[key] }}
+            title={rowElementByType[type](videos[index][key] || '')}
+            key={key}
+          >
+            {rowElementByType[type](videos[index][key] || '')}
           </div>
         ))
       ) : (

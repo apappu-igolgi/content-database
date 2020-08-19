@@ -4,11 +4,10 @@ import { Formik, Form, Field } from 'formik';
 import { Alert } from '@material-ui/lab'
 
 import styles from '../../styles/FilterPopup.module.scss';
-import { comparisonOptions } from '../../util/videos';
 
 const allowedOperatorsByType = {
-  number: ['gt', 'lt', 'equals'],
-  string: ['equals', 'contains'],
+  number: ['>', '<', '='],
+  string: ['=', 'contains'],
 }
 
 const FilterPopup = ({ fields, onSubmit, close }) => {
@@ -38,8 +37,8 @@ const FilterPopup = ({ fields, onSubmit, close }) => {
             </Field>
 
             <Field className={styles.field} as={Select} name="comparison">
-              {Object.entries(comparisonOptions).filter(([option]) => allowedOperations.includes(option)).map(([option, text]) => (
-                <MenuItem value={option}>{text}</MenuItem>
+              {allowedOperations.map(operation => (
+                <MenuItem value={operation}>{operation}</MenuItem>
               ))}
             </Field>
 

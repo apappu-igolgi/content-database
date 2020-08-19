@@ -2,9 +2,10 @@ import { Select, MenuItem, Input, TextField, Button, InputLabel, FormControl } f
 import { Formik, Form, Field } from 'formik';
 
 import styles from '../../styles/AddFieldPopup.module.scss';
-import { capitalize } from '../../util/videos';
 
 const types = ['number', 'string', 'image'];
+
+const capitalize = word => word[0].toUpperCase() + word.slice(1);
 
 const AddFieldPopup = ({ onSubmit, close, field, editMode = false, onDelete }) => (
   <Formik initialValues={editMode ? field : { key: '', type: types[0] }} onSubmit={values => onSubmit(values).then(close)}>
