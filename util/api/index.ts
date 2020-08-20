@@ -1,16 +1,22 @@
 import { Db } from "mongodb";
 import { NextApiResponse, NextApiRequest } from "next";
 import * as yup from 'yup';
-import { type } from "os";
 
 export type FieldType = "number" | "string" | "image"
 export type Field = {
-  key: string,
+  key: string, // this key corresponds to the key in a video document
   type: FieldType,
-  locked?: boolean,
+  locked?: boolean, // if the field is locked, it can't be edited (renamed or deleted) from the frontend
 }
 
-export type Filters = { [key: string]: { '>': number, '<': number, '=': string | number, contains: string | number } };
+export type Filters = {
+  [key: string]: {
+    '>': number,
+    '<': number,
+    '=': string | number,
+    contains: string | number
+  }
+};
 
 export const fieldSchema: yup.ObjectSchema<Field> = yup.object({
   key: yup.string().required(),

@@ -29,6 +29,9 @@ export default function Home() {
   const resetTable = () => {
     setVideos([]);
     if (infiniteLoaderRef.current) {
+      // the following method is not very well documented, but passing 'true' causes the infinite loader
+      // to actually request the items the user is looking at after clearing the cache
+      // https://github.com/bvaughn/react-window-infinite-loader/blob/31ad47c75641a1feeae0efe3a4f387b19372b460/src/InfiniteLoader.js#L49
       infiniteLoaderRef.current.resetloadMoreItemsCache(true);
     }
   }

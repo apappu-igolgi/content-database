@@ -14,7 +14,7 @@ export const getVideos = (start, end, filters) => (
   request('GET', `/api/videos?start=${start}&end=${end}&filters=${encodeURIComponent(JSON.stringify(filters))}`)
 );
 
-// Note: the add,update videos and add,update,delete fields endpoints both support multiple
+// Note: the add,update videos and add,update,delete fields endpoints support multiple
 // but the frontend only supports adding/updating/deleting one at a time, so the following functions
 // make it more convenient to do so
 
