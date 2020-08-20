@@ -32,4 +32,4 @@ export const updateField = (oldKey, field) => request('PUT', '/api/fields', [{ o
 
 export const deleteField = key => request('DELETE', '/api/fields', [key]);
 
-export const reorderFields = keys => request('POST', '/api/fields/reorder', { keys });
+export const reorderFields = keys => request('POST', '/api/fields/reorder', keys);

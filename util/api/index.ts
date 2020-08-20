@@ -10,7 +10,7 @@ export type Field = {
   locked?: boolean,
 }
 
-export type Filters = { [key: string]: { '>': number, '<': number, equals: string | number, contains: string | number } };
+export type Filters = { [key: string]: { '>': number, '<': number, '=': string | number, contains: string | number } };
 
 export const fieldSchema: yup.ObjectSchema<Field> = yup.object({
   key: yup.string().required(),
@@ -36,10 +36,10 @@ export const filtersToQuery = async (filters: Filters, db: Db) => {
       if (fieldsToType[key] === 'number') {
         if (filter['>'] !== undefined) query[key].$gt = Number(filter['>']);
         if (filter['<'] !== undefined) query[key].$lt = Number(filter['<']);
-        if (filter.equals !== undefined) query[key] = Number(filter.equals);
+        if (filter['='] !== undefined) query[key] = Number(filter['=']);
       } else if (fieldsToType[key] === 'string') {
         if (filter.contains !== undefined) query[key] = { $regex: filter.contains, $options: 'i' };
-        if (filter.equals !== undefined) query[key] = filter.equals;
+        if (filter['='] !== undefined) query[key] = filter['='];
       }
     });
   }

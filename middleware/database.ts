@@ -14,6 +14,12 @@ export default async function database(req: NextApiRequest & RequestWithDB, res:
 
   req.dbClient = client;
   req.db = client.db('content-database');
+
+  // ensure that there is always a document in the fields collection
+  const count = await req.db.collection('fields').find({}).count();
+  if (count === 0) {
+    req.db.collection('fields').insertOne({ fields: [] });
+  }
   
   return next();
 }

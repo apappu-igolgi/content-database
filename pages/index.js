@@ -28,7 +28,9 @@ export default function Home() {
 
   const resetTable = () => {
     setVideos([]);
-    infiniteLoaderRef.current.resetloadMoreItemsCache(true);
+    if (infiniteLoaderRef.current) {
+      infiniteLoaderRef.current.resetloadMoreItemsCache(true);
+    }
   }
 
   useEffect(() => {

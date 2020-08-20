@@ -1,30 +1,36 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+This project was made using [Next.js](https://nextjs.org/) with a [React](https://reactjs.org/) frontend and a [TypeScript](https://www.typescriptlang.org/) backend, as well as [MongoDB](https://www.mongodb.com/).
+
+
 
 ## Getting Started
 
-First, run the development server:
+First, make sure you have [Node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/try/download/community) installed (or use a cloud service such as [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)).
 
+After cloning the repository, create a file named `.env.local` in the repository's root directory, with the content:
+```
+MONGODB_CONNECTION_STRING=mongodb://localhost:27017/content-database?retryWrites=true&w=majority
+```
+replacing the connection URI with your own.
+
+Then, install dependencies and run the application with:
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:8080](http://localhost:8080) with your browser to see the result.
+You should see an empty table with the text "No videos found." (since the database is currently empty)
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+To populate the database with random data for testing, run:
+```bash
+node scripts/populate-database.js
+```
 
-## Learn More
+To start the application in production, run:
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+For development, `pages/index.js` is the starting point for the frontend, and `pages/api` containes all the API endpoints
