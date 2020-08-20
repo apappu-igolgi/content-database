@@ -33,4 +33,4 @@ npm run build
 npm start
 ```
 
-For development, `pages/index.js` is the starting point for the frontend, and `pages/api` containes all the API endpoints
+For development, `pages/index.js` is the starting point for the frontend, and `pages/api` containes all the API endpoints, see the [design doc](DESIGN.md) for more info.
