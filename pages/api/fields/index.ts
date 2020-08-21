@@ -23,11 +23,18 @@ handler.post<ExtendedRequest, ExtendedResponse>((req, res) => {
     await yup.array().min(1).of(fieldSchema).validate(newFields);
 
     const { fields }: { fields: [Field] } = await req.db.collection('fields').findOne({});
-    const allFields = fields.concat(newFields);
-    await req.db.collection('fields').findOneAndReplace({}, { fields: allFields });
+    const keys = new Set(fields.map(({ key }) => key));
+    newFields.forEach(field => {
+      if (keys.has(field.key)) {
+        throw Error(`Field with key '${field.key}' already exists`);
+      }
+      fields.push(field);
+      keys.add(field.key);
+    })
+    await req.db.collection('fields').findOneAndReplace({}, { fields });
 
     res.statusCode = 200;
-    res.json(allFields);
+    res.json(fields);
   })
 });
 

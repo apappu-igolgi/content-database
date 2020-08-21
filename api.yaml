@@ -1,0 +1,548 @@
+openapi: 3.0.0
+info:
+  title: content database
+  version: '1.0'
+  description: |-
+    Documentation for content database tool at igolgi inc.
+
+    Make sure that all non-GET requests specify the header `Content-Type: 'application/json'`
+servers:
+  - url: /api
+tags:
+  - name: videos
+  - name: fields
+paths:
+  /videos/count:
+    get:
+      summary: Get Video Count
+      tags:
+        - videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+              examples:
+                example:
+                  value: 1001
+      operationId: get-videos-count
+      description: |-
+        Get the number of videos in the database.
+
+        If `filters` are provided, gets the number of videos that satisfy those filters.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: filters
+          description: make sure that the JSON is URL encoded.
+  /videos:
+    get:
+      summary: Get Videos
+      tags:
+        - videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Video'
+              examples:
+                example:
+                  value:
+                    - _id: 5f3e3ce673f25b6743e3b8f4
+                      Thumbnail: ''
+                      Filename: Video 1.mp4
+                      Description: ''
+                      Stream Type: SPTS
+                      File Format: Transport Stream
+                      Resolution: 1280x720
+                      Codec: MPEG-2
+                      Aspect Ratio: '4:3'
+                      Frame Rate: 13
+                    - _id: 5f3e3ce673f25b6743e3b8fd
+                      Thumbnail: ''
+                      Filename: Video 10.mp4
+                      Description: ''
+                      Stream Type: MPTS
+                      File Format: Transport Stream
+                      Resolution: 1280x720
+                      Codec: MPEG-4
+                      Aspect Ratio: '16:9'
+                      Frame Rate: 13
+      operationId: get-videos
+      description: |-
+        Gets the video objects in the specified range from `start` to `end` (inclusive).
+
+        If `filters` are provided (in JSON format), will apply those filters first, then get the provided range.
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: start
+          required: true
+        - schema:
+            type: integer
+          in: query
+          name: end
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: filters
+          description: make sure that the JSON is URL encoded.
+    post:
+      summary: Add Videos
+      operationId: post-videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+              examples:
+                example:
+                  value: 1002
+      description: |-
+        Given a list of video objects, adds all of them to the database (note that the video can specify as few or as many fields as desired). If there are any new fields in any of the provided videos, also adds those fields to the fields collection in the database.
+
+        Returns the new total video count (after adding the provided videos).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            examples:
+              example:
+                value:
+                  - Description: This is the description.
+                  - Filename: Video 2.mp4
+      tags:
+        - videos
+    put:
+      summary: Update Videos
+      operationId: put-videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Video'
+              examples:
+                example:
+                  value:
+                    - _id: 5f3cb4c0731d513d5471f8a0
+                      Filename: 'hello world!'
+                      Description: This is the description.
+                    - _id: 5f3e3ce673f25b6743e3b8f4
+                      Filename: Video 2.mp4
+                      Description: Lorem ipsum dolor
+      description: |-
+        Given a list of video objects, updates each one by adding/modifying the specified fields.
+        The `_id` field must be specified in each object in order to identify which video to update.
+
+        Note that this does not replace the entire video object by the provided one, the updates are done on a field by field basis.
+
+        Returns a list of the complete updated videos (since the provided videos may only have values for the fields that need to be updated).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Video'
+            examples:
+              example:
+                value:
+                  - _id: 5f3cb4c0731d513d5471f8a0
+                    Filename: 'hello world!'
+                  - _id: 5f3e3ce673f25b6743e3b8f4
+                    Description: Lorem ipsum dolor
+      tags:
+        - videos
+    delete:
+      summary: Delete Videos
+      operationId: delete-videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+              examples:
+                example:
+                  value: 998
+      description: |-
+        Given a list of video ids, deletes the corresponding videos.
+
+        Returns the new total video count (after deletion).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            examples:
+              example:
+                value:
+                  - 5f3cb851731d513d5471f8a2
+                  - 5f3e3ce673f25b6743e3b8f4
+                  - 5f3e3ce673f25b6743e3b8fd
+                  - 5f3e3ce673f25b6743e3b8fe
+      tags:
+        - videos
+  /fields:
+    get:
+      summary: Get Fields
+      tags:
+        - fields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Filename
+                      type: string
+                      locked: true
+                    - key: Description
+                      type: string
+                      locked: true
+      operationId: get-fields
+      description: Get the list of fields.
+    post:
+      summary: Add Fields
+      operationId: post-fields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Filename
+                      type: string
+                      locked: true
+                    - key: Description
+                      type: string
+                      locked: true
+                    - key: test1
+                      type: number
+                    - key: test2
+                      type: image
+      description: |-
+        Given a list of fields, checks to make sure all the keys are unique, and add them to the database.
+
+        Returns list of all fields, including the ones just added.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Field'
+            examples:
+              example:
+                value:
+                  - key: test1
+                    type: number
+                  - key: test2
+                    type: image
+      tags:
+        - fields
+    put:
+      summary: Update Fields
+      operationId: put-fields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Filename
+                      type: string
+                      locked: true
+                    - key: Description
+                      type: string
+                      locked: true
+                    - key: renamed1
+                      type: string
+                    - key: test2
+                      type: number
+      description: |-
+        Given a list of objects with properties `oldKey` and `field`, updates the field with `oldKey` with the properties of the given field. Both the `key` and `type` must be specified on `field`. Only unlocked fields can be updated.
+
+        Also goes through each videos and replaces the old field key with the new one.
+
+        Returns the complete list of fields after updating.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  oldKey:
+                    type: string
+                  field:
+                    $ref: '#/components/schemas/Field'
+            examples:
+              example:
+                value:
+                  - oldKey: test1
+                    field:
+                      key: renamed1
+                      type: string
+                  - oldKey: test2
+                    field:
+                      key: test2
+                      type: number
+      tags:
+        - fields
+    delete:
+      summary: Delete Fields
+      operationId: delete-fields
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Filename
+                      type: string
+                      locked: true
+                    - key: Description
+                      type: string
+                      locked: true
+      description: 'Given a list of field keys, deletes the corresponding fields. Only unlocked fields can be deleted.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            examples:
+              example:
+                value:
+                  - renamed1
+                  - test2
+        description: ''
+      tags:
+        - fields
+  /fields/lock:
+    post:
+      summary: Lock Fields
+      operationId: post-fields-lock
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Thumbnail
+                      type: image
+                      locked: true
+                    - key: Filename
+                      type: string
+                      locked: true
+                    - key: Description
+                      type: string
+                      locked: true
+      description: |-
+        Given a list of field keys, locks the corresponding fields.
+
+        Returns complete list of fields after locking.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            examples:
+              example:
+                value:
+                  - Filename
+                  - Description
+      tags:
+        - fields
+  /fields/unlock:
+    post:
+      summary: Unlock Fields
+      operationId: post-fields-unlock
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+              examples:
+                example:
+                  value:
+                    - key: Thumbnail
+                      type: image
+                      locked: true
+                    - key: Filename
+                      type: string
+                      locked: false
+                    - key: Description
+                      type: string
+                      locked: false
+      description: |-
+        Given a list of field keys, unlocks the corresponding fields.
+
+        Returns complete list of fields after unlocking.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+            examples:
+              example:
+                value:
+                  - Filename
+                  - Description
+        description: ''
+      tags:
+        - fields
+components:
+  schemas:
+    Filters:
+      title: Filters
+      type: object
+      x-examples:
+        example:
+          Filename:
+            contains: '1'
+          Frame Rate:
+            <: 30
+      properties:
+        key1:
+          $ref: '#/components/schemas/Filter'
+        key2:
+          $ref: '#/components/schemas/Filter'
+        key3:
+          $ref: '#/components/schemas/Filter'
+        keyN:
+          $ref: '#/components/schemas/Filter'
+    Video:
+      title: Video
+      type: object
+      description: The object contains key value pairs for (up to) every defined field
+      x-examples:
+        example:
+          _id: 5f3e3ce673f25b6743e3b8f4
+          Thumbnail: ''
+          Filename: Video 1.mp4
+          Description: ''
+          Stream Type: SPTS
+          File Format: Transport Stream
+          Resolution: 1280x720
+          Codec: MPEG-2
+          Aspect Ratio: '4:3'
+          Video Bitrate: 1262
+          Video Type: interlaced
+          Pixel Format: '420'
+          Frame Rate: 13
+          Filepath: /path/to/file/
+          IP Address: 127.0.0.1
+          '# of B-frames': 10
+          '# of Pyramidal B-frames': 10
+          '# of Audio Streams': 2
+          Audio Codec(s): ''
+          Audio Bitrate: 896
+          Audio Channels: '5.1'
+          Audio Language: ''
+          SCTE35: ''
+          SCTE27: ''
+          Subtitles: ''
+      properties:
+        _id:
+          type: string
+    Field:
+      type: object
+      x-examples:
+        Filename:
+          key: Filename
+          type: string
+          locked: true
+        '# of Audio Streams':
+          key: '# of Audio Streams'
+          type: number
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+          enum:
+            - string
+            - number
+            - image
+        locked:
+          type: boolean
+      required:
+        - key
+        - type
+    Filter:
+      title: Filter
+      type: object
+      properties:
+        '>':
+          type: number
+        <:
+          type: number
+        =:
+          oneOf:
+            - type: string
+            - type: number
+        contains:
+          type: string

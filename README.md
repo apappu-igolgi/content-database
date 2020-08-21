@@ -34,3 +34,9 @@ npm start
 ```
 
 For development, `pages/index.js` is the starting point for the frontend, and `pages/api` containes all the API endpoints, see the [design doc](DESIGN.md) for more info.
+
+## API
+API Documentation [here](API.md)
+
+A more complete OpenAPI 3 specification with additional examples can be found [here](api.yaml)
+

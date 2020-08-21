@@ -69,13 +69,18 @@ handler.put<ExtendedRequest, ExtendedResponse>((req, res) => {
   handleErrors(req, res, async () => {
     const updatedVideos: [any] = req.body;
     await yup.array().min(1).of(yup.object({ _id: yup.string().required() })).validate(updatedVideos);
-
+    
     updatedVideos.forEach(async ({ _id, ...video }) => {
       await req.db.collection('videos').updateOne({ _id: new ObjectID(_id) }, { $set: video });
-    })
+    });
+
+    // the provided updatedVideos may only contain the specific fields that need to be updated
+    // we want to return the complete updated videos with all the fields
+    const ids = updatedVideos.map(({ _id }) => new ObjectID(_id));
+    const completeUpdatedVideos = await req.db.collection('videos').find({ _id: { $in: ids }}).toArray();
     
     res.statusCode = 200;
-    res.json(updatedVideos);
+    res.json(completeUpdatedVideos);
   });
 });
 
